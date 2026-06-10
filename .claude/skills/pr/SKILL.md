@@ -1,133 +1,241 @@
-# PR作成
+---
+name: pr
+description: コミット済みの作業ブランチをPushし、develop向けの通常Pull Requestを作成する。
+argument-hint: "[issue-number]"
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+disallowed-tools:
+  - Write
+  - Edit
+  - NotebookEdit
+  - Skill
+---
 
-Git Flow に沿って Pull Request を作成し、CI 監視と自己修復を行う。
+# pr
 
-## プロセス
+## 目的
 
-### 1. 現在のブランチと変更内容を確認
+対象Issue、承認済み実装方針、`develop`との差分を確認し、現在の作業ブランチをPushして通常のPull Requestを作成する。
 
-```bash
-git status
-git log develop..HEAD --oneline
-git diff develop...HEAD --stat
+PRの向きは、作業ブランチから`develop`とする。
+
+このSkillを実行した時点で、`/review`とGeminiによるレビューが完了し、PR作成について人間の承認を得ているものとする。
+
+## 使用方法
+
+```text
+/pr 12
 ```
 
-- リモート追跡がない場合は push が必要
-- ベースブランチを判定:
-  - `feature/*` `feat/*` `refactor/*` `fix/*` `chore/*` `docs/*` `test/*` `style/*` → `develop`
-  - `hotfix/*` → `main`
-  - `release/*` → `main`
+## 手順
 
-### 2. 既存 PR の有無を確認
+1. 対象Issueと承認済み実装方針を取得する。
 
-```bash
-gh pr list --head <current-branch> --json number,state,title
+   ```bash
+   gh issue view $0 --json number,title,body,comments,state,url
+   ```
+
+   Issueが存在しない、閉じている、または`## 実装方針（承認済み）`がない場合は停止する。
+
+2. Gitの状態を確認する。
+
+   ```bash
+   git branch --show-current
+   git status --short
+   git fetch origin
+   ```
+
+   次の場合は停止する。
+   - 現在のブランチが`main`または`develop`
+   - 未コミットの変更がある
+   - `develop`との差分コミットがない
+   - マージまたはリベースの競合が残っている
+
+3. デフォルトブランチが`develop`であることを確認する。
+
+   ```bash
+   gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'
+   ```
+
+   `develop`でない場合は、設定を変更せず停止する。
+
+4. `develop`との差分とコミット履歴を確認する。
+
+   ```bash
+   git log --oneline develop..HEAD
+   git diff --name-status develop...HEAD
+   git diff --stat develop...HEAD
+   ```
+
+5. 現在のブランチを対象とするPRが存在しないことを確認する。
+
+   ```bash
+   gh pr list --head "$(git branch --show-current)" --state all --json number,state,url
+   ```
+
+   既存PRがある場合は、新規作成せず停止する。
+
+6. Issue、方針シート、コミット履歴、差分からPRタイトルと本文を作成する。
+
+7. 現在のブランチをPushする。
+
+   ```bash
+   git push -u origin "$(git branch --show-current)"
+   ```
+
+8. Draftではない通常PRを`develop`向けに作成する。
+
+   ```bash
+   gh pr create \
+     --base develop \
+     --head "$(git branch --show-current)" \
+     --title "<接頭辞>: <日本語のPRタイトル>" \
+     --body-file -
+   ```
+
+   PR本文は標準入力から渡し、本文作成のためにローカルファイルを作らない。
+
+9. 作成されたPRの番号とURLを報告する。
+
+## PRタイトル
+
+次の形式にする。
+
+```text
+<接頭辞>: <日本語の変更内容>
 ```
 
-既存 PR がある場合は「新規作成」ではなく **タイトル・本文の更新 + 追加コミットの push** で対応する。
+接頭辞は変更内容に応じて選ぶ。
 
-### 3. push
+| 接頭辞     | 用途                     |
+| ---------- | ------------------------ |
+| `feat`     | 新機能・画面・処理の追加 |
+| `fix`      | 不具合修正               |
+| `refactor` | 挙動を変えない整理       |
+| `docs`     | ドキュメント変更         |
+| `style`    | CSS・表示上の変更        |
+| `chore`    | 設定・環境・CIなどの変更 |
 
-```bash
-# 初回
-git push -u origin <current-branch>
+## PR本文
 
-# rebase 後
-git push --force-with-lease
-```
-
-`--force` は禁止。必ず `--force-with-lease` を使う。
-
-### 4. PR タイトル・本文の提案
-
-タイトル: コミットメッセージ規約に準拠、70 文字以内。
-
-本文テンプレート:
+次のテンプレートを使用する。
 
 ```markdown
-## Summary
+## 概要
 
-- 1〜3 行で変更の目的を端的に
-- レビュアーが最初に知りたいのは「なぜ」と「何を変えたか」
+- Issue #XXX として、画面・機能・修正内容を実装
+- mock-backed adapterとしての実装など、重要な前提がある場合のみ追記
 
 ## 主な実装
 
-- 技術的ポイント（設計判断・層構成）
-- 本 PR で解決する Issue / 設計書へのリンク
+- **機能・ファイル名**：実装内容と設計上の意図
+- **機能・ファイル名**：実装内容と設計上の意図
 
-## 本 PR 対象外（将来対応）
+## Figma / 設計書との差異・補足
 
-- 明示的に今回やらないこと。レビュアーの期待値調整
+- 承認済み方針との相違点と理由
+- 実装上のトレードオフと判断根拠
+
+## 本PR対象外
+
+- 対象外の内容
+- 対応が必要になる条件
 
 ## Test plan
 
-- [ ] lint / typecheck / test が通る
-- [ ] 動作確認の手順（URL、curl、画面操作）
-- [ ] 既存機能の回帰チェック
+### 自動チェック
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+- 未実施（テスト導入工程で別途対応）
+
+### 受け入れ条件
+
+- [ ] Issueの受け入れ条件
+
+### リグレッション確認
+
+- [ ] 既存機能への意図しない影響がない
+
+Closes #XXX
 ```
 
-ユーザーの承認を得てから PR を作成・更新する。
+次のセクションは、該当する場合だけ記載する。
 
-### 5. CI 監視（自動）
+- `Figma / 設計書との差異・補足`
+- `本PR対象外`
+- `リグレッション確認`
+- mock-backed adapterなどの補足
 
-PR 作成・更新後、CI の完了を待つ:
+受け入れ条件は、対象Issueからそのまま対応関係が分かる形で転記する。
 
-```bash
-gh pr checks <PR番号> --watch
+実施していない確認を完了済みの`[x]`にしない。
+
+本文末尾には必ず次を記載する。
+
+```text
+Closes #<Issue番号>
 ```
 
-完了時、終了コードが 0 なら全 pass。非 0 なら 1 つ以上失敗しているので次ステップへ。
+## 禁止事項
 
-### 6. CI 失敗時の自己修復ループ
+- コードやコミット内容を変更しない
+- 未コミット変更を自動でコミットしない
+- `main`向けのPRを作成しない
+- Draft PRを作成しない
+- 既存PRを更新・上書きしない
+- リポジトリ設定を変更しない
+- 実施していないテストや確認を完了扱いにしない
+- PRを自動でマージしない
+- 作業ブランチを削除しない
 
-最新の workflow run ID を取得し、失敗ジョブのログを取得する:
+## 出力形式
 
-```bash
-# 現在のブランチの最新 run-id を取得
-RUN_ID=$(gh run list --branch "$(git branch --show-current)" --limit 1 --json databaseId --jq '.[0].databaseId')
-gh run view "$RUN_ID" --log-failed | tail -200
-```
+### ステータス
 
-**定型失敗は自動修復** する:
+`CREATED`または`STOPPED`。
 
-| 失敗パターン           | 自己修復アクション                                                            |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| Prettier format 未適用 | `make format` → 差分を `style: Prettier フォーマットを適用` でコミット → push |
-| ESLint エラー          | `make lintfix` → 残るエラーは内容を確認して修正 → コミット                    |
-| PHP Pint 未適用        | `make pint` → 差分を `style: Pint フォーマットを適用` でコミット → push       |
-| TypeScript 型エラー    | 型定義を修正してコミット                                                      |
-| PHPUnit / Jest の失敗  | 失敗内容を報告し、**自動修正せず** ユーザーに原因を確認する                   |
-| ビルド失敗（原因不明） | ログを報告し、ユーザーに対応方針を確認する                                    |
+### 対象Issue
 
-**ループ終了条件:**
+- Issue番号
+- Issueタイトル
 
-- CI が全てパス
-- 同じ失敗が 2 回続く（ループを抜けてユーザーに報告）
-- テスト失敗など自動修復対象外
+### Pull Request
 
-### 7. 完了報告
+- PR番号
+- PRタイトル
+- Baseブランチ
+- Headブランチ
+- PR URL
 
-- PR URL を提示
-- CI 状況（pass / fail）を明示
-- 次のアクション（レビュー依頼、マージ）を案内
+### Issue連携
 
-## ルール
+- `Closes #<Issue番号>`の記載有無
+- `develop`がデフォルトブランチであること
 
-- 承認なしに PR を作成しない
-- 1 PR = 1 機能
-- タイトルは 70 文字以内
-- `git push --force` 禁止（`--force-with-lease` のみ）
-- CI 失敗時は自動修復 → ダメならユーザー相談、無言で放置しない
-- テスト失敗は自動修正しない（原因究明をユーザーと行う）
+### 停止理由
 
-## Troubleshooting
+`STOPPED`の場合のみ記載する。
 
-Error: `gh pr checks --watch` が長時間終わらない
-Cause: CI が遅い、または中断
-Solution: Bash タイムアウト（最大 600000ms = 10 分）の範囲でリトライ。それでも終わらない場合はループを抜け、`gh run list --branch <branch> --limit 1` で状況を確認してユーザーに報告
+### 次の工程
 
-Error: 同じ失敗が連続
-Cause: 自己修復スクリプトが問題を解決できていない
-Solution: ループを抜け、失敗ログをユーザーに報告。手動修正方針を相談
+PR作成後は、人間による内容確認と`develop`へのマージを案内する。
+
+## 完了条件
+
+- 作業ブランチをPushしている
+- `develop`向けの通常PRを作成している
+- PR本文がIssueと実装差分に一致している
+- `Closes #<Issue番号>`を記載している
+- PR番号とURLを報告している
+
+## 参照
+
+- `.claude/skills/analyze-issue/SKILL.md`
+- `.claude/skills/implement-issue/SKILL.md`
+- `.claude/skills/review/SKILL.md`
+- `.claude/skills/commit/SKILL.md`
+- `.claude/rules/issue-workflow.md`
+- `.github/pull_request_template.md`

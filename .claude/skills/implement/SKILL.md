@@ -1,75 +1,206 @@
-# 実装
+---
+name: implement
+description: Issueコメントの承認済み実装方針を読み込み、developを最新化してIssue用ブランチを作成し、方針の範囲内で初回実装を行う。
+argument-hint: "[issue-number]"
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - Write
+  - Edit
+disallowed-tools:
+  - NotebookEdit
+---
 
-仕様ドキュメントをもとに、CLAUDE.md のアーキテクチャに沿って実装する。
+# implement
 
-## パイプライン
+## 目的
 
-- 前提: 最低限 `/requirements` 完了（`/api-design` まで完了が理想）
-- 読込: `docs/requirements/`, `docs/features/`, `docs/database/`, `docs/api/`
-- 出力: ソースコード
-- 次: `/test-gen`
+対象Issueのコメントに記録された、最新の`## 実装方針（承認済み）`を読み込む。
 
-## プロセス
+`develop`を最新化し、方針シートに記載されたIssue用ブランチを作成したうえで、承認済みの範囲内で初回実装を行う。
 
-### 1. 仕様確認
+## 使用方法
 
-`docs/` 配下のドキュメントを読んで理解する。
-実装対象が不明確な場合はユーザーに確認する。
+Issue番号を指定して手動で実行する。
 
-### 2. 実装（CLAUDE.md の実装順序に従う）
-
-**バックエンド:**
-
-```
-1. マイグレーション + Model（リレーション定義）
-2. Repository（データアクセス：インターフェース + 実装 + DI バインド）
-3. FormRequest（バリデーション）
-4. Action（ビジネスロジック：Repository を DI で受け取る）
-5. Service（必要な場合のみ：外部API・技術的処理）
-6. Resource（レスポンス整形：アクションごとに分離）
-7. Controller + ルーティング
-```
-
-コード配置に迷ったら CLAUDE.md の「コード配置の判断」決定木に従う。
-
-**フロントエンド:**
-
-```
-1. types/（API仕様に合わせた型定義）
-2. api/（通信関数）
-3. hooks/（データ取得・ロジック）
-4. components/（UI）
+```text
+/implement 12
 ```
 
-すべて `features/{機能名}/` 内に配置する。
+このSkillを実行した時点で、承認済み実装方針に基づくブランチ作成と初回実装について、人間のGOサインを得ているものとする。
 
-### 3. 実装後チェック
+## 手順
 
-- [ ] Controller は Action を呼ぶだけの薄い層か
-- [ ] Action は `__invoke()` の単一責務か
-- [ ] Action 内で Eloquent を直接使っていないか（Repository に委譲しているか）
-- [ ] Repository にインターフェース（`Interfaces/Repositories/`）と DI バインドがあるか
-- [ ] Service にインターフェース（`Interfaces/Services/`）と DI バインドがあるか
-- [ ] Resource はアクションごとに分離され、フィールドが明示的に列挙されているか
-- [ ] クラス参照は `use` 文でインポートしているか（`\Illuminate\Support\Str` のようなインラインフルパス指定禁止）
-- [ ] 型宣言（引数・戻り値）があるか
-- [ ] N+1 問題がないか（Repository 内で `with()` による Eager Loading）
-- [ ] バリデーションが FormRequest で行われているか
-- [ ] FormRequest に `attributes()` メソッドがあり、項目名が日本語で定義されているか
-- [ ] エラーハンドリングが適切か
-- [ ] フロントの機能コードが `features/{機能名}/` に閉じているか
-- [ ] features 間の依存が型の import のみか
+1. 次のコマンドでIssue本文とコメントを取得する。
 
-### 4. 自動レビュー（実装完了後に実行）
+   ```bash
+   gh issue view $0 --json number,title,body,comments,state,url
+   ```
 
-実装が完了したら、`/review` スキルを実行する。
-`/review` が code-reviewer と Codex の並列レビューを行い、結果を統合して報告する。
+2. コメントから、最新の次の見出しを持つ方針シートを取得する。
 
-🔴 重大の指摘がある場合は、ユーザーに修正するか確認してから対応する。自動修正は行わない。
+   ```markdown
+   ## 実装方針（承認済み）
+   ```
 
-## ルール
+   方針シートが存在しない場合は停止する。
 
-- CLAUDE.md のアーキテクチャとコーディング規約に準拠する
-- 既存コードのパターンに合わせる
-- スコープを広げすぎない（1機能に集中）
-- 実装後のレビュー（ステップ4）を実行する
+3. 方針シートから次を確認する。
+   - ブランチ構成
+   - 変更・追加するファイル
+   - 変更なし（スコープ外）
+   - 事前確認
+   - 動作確認
+
+   未完了の事前確認や、実装前に判断が必要な項目が残っている場合は停止する。
+
+4. `git status --short`を実行する。
+
+   未コミットの変更がある場合は、stash・破棄・コミットを行わず停止する。
+
+5. `develop`へ切り替え、最新化する。
+
+   ```bash
+   git switch develop
+   git fetch origin
+   git pull --ff-only origin develop
+   ```
+
+   `develop`が存在しない場合や、fast-forwardで更新できない場合は停止する。
+
+6. 方針シートに記載されたブランチ名について、同名のローカル・リモートブランチが存在しないことを確認する。
+
+   同名ブランチが存在する場合は、削除・上書き・再利用をせず停止する。
+
+7. 方針シートに記載されたブランチ名で、Issue用ブランチを作成して切り替える。
+
+   ```bash
+   git switch -c '<方針シートに記載されたブランチ名>'
+   ```
+
+8. 承認済みの実装方針と次のルールに従い、コードを実装する。
+   - `.claude/rules/project-principles.md`
+   - `.claude/rules/laravel.md`
+   - `.claude/rules/blade-tailwind.md`
+
+9. 実装内容と変更ファイルを報告する。
+
+## 実装原則
+
+- 方針シートの「変更・追加」に記載された範囲を基準にする
+- 「変更なし（スコープ外）」へ踏み込まない
+- Issueの受け入れ条件に必要な最小限のコードだけを実装する
+- 不要な抽象化・共通化・レイヤーを追加しない
+- 既存の命名規則、構成、実装パターンを優先する
+- 方針シートで指定された既存コードを再利用する
+- Issueと無関係な修正やリファクタリングを行わない
+
+方針シートにない変更でも、次の条件をすべて満たす場合は実施してよい。
+
+- Issueの達成に不可欠である
+- 影響範囲が小さい
+- 既存仕様を変更しない
+- 新しい設計判断を必要としない
+
+方針外で実施した変更は、完了報告で必ず明示する。
+
+## コマンドの制限
+
+承認済みの実装に必要な`artisan make:*`など、ファイル生成コマンドは使用してよい。
+
+Migrationファイルは作成してよいが、データベースの状態を変更するコマンドは実行しない。
+
+禁止例:
+
+```text
+php artisan migrate
+./vendor/bin/sail artisan migrate
+make migrate
+php artisan migrate:fresh
+php artisan migrate:refresh
+php artisan migrate:reset
+php artisan migrate:rollback
+php artisan db:seed
+```
+
+上記に限らず、Migration、Seeder、Rollbackなど、データベースへ変更を加えるコマンドは禁止する。
+
+既存ファイルは`Write`または`Edit`で編集する。`sed -i`や`echo > file`など、Bashによるファイル内容の一括書き換えは行わない。
+
+## 停止条件
+
+実装中に次が判明した場合は、推測で進めず停止する。
+
+- 方針シートとIssue・既存コードに矛盾がある
+- 方針シートの想定を超える影響がある
+- 想定外のパッケージ追加や破壊的変更が必要
+- 新しい仕様・セキュリティ・データ設計の判断が必要
+
+途中で停止した場合、それまでの変更は戻さず、変更内容と停止理由を報告する。
+
+## 対象外
+
+- 実装方針の作成・変更
+- テストコードの作成・変更
+- テストや動作確認コマンドの実行
+- Pint・Lint・静的解析・ビルド
+- コードレビュー・リファクタリング
+- 検証やレビュー後の修正対応
+- コミット・Push・Pull Request作成
+- Issueの範囲外の修正
+
+## 出力形式
+
+### ステータス
+
+`COMPLETED`または`STOPPED`のいずれか1つ。
+
+### 対象Issue
+
+- Issue番号
+- Issueタイトル
+
+### 作成ブランチ
+
+実際に作成して切り替えたブランチ名を記載する。
+
+ブランチ作成前に停止した場合は「未作成」と記載する。
+
+### 実装内容
+
+受け入れ条件と対応する実装内容を簡潔に記載する。
+
+### 変更ファイル
+
+新規作成・変更したファイルパスと、その役割を記載する。
+
+### 方針外の変更
+
+承認済み方針に含まれていなかった変更と、その必要性を記載する。
+
+該当しない場合は「なし」と記載する。
+
+### 未対応・停止理由
+
+未対応の事項または停止理由があれば記載する。
+
+### 次の工程
+
+`COMPLETED`の場合は、方針シートの「動作確認」に基づく検証工程へ進むよう案内する。
+
+## 完了条件
+
+- 方針シートに記載されたブランチ上で実装している
+- 承認済みの範囲内で実装している
+- 実装内容と方針外の変更を報告している
+
+## 参照
+
+- `.claude/skills/analyze/SKILL.md`
+- `.claude/rules/project-principles.md`
+- `.claude/rules/issue-workflow.md`
+- `.claude/rules/laravel.md`
+- `.claude/rules/blade-tailwind.md`
