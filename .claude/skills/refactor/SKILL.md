@@ -58,7 +58,7 @@ disallowed-tools:
 1. 次のコマンドでIssue本文とコメントを取得する。
 
    ```bash
-   gh issue view $0 --json number,title,body,comments,state,url
+   gh issue view <Issue番号> --json number,title,body,comments,state,url
    ```
 
 2. Issueコメントから、最新の次の方針シートを取得する。
@@ -236,8 +236,8 @@ FormRequest、Mailable、Policy、Blade ComponentなどLaravel標準の責務も
 
 ## 参照
 
-- `.claude/skills/analyze-issue/SKILL.md`
-- `.claude/skills/implement-issue/SKILL.md`
+- `.claude/skills/analyze/SKILL.md`
+- `.claude/skills/implement/SKILL.md`
 - `.claude/skills/review/SKILL.md`
 - `.claude/rules/project-principles.md`
 - `.claude/rules/laravel.md`

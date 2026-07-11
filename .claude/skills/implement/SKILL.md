@@ -12,6 +12,7 @@ allowed-tools:
   - Edit
 disallowed-tools:
   - NotebookEdit
+  - Skill
 ---
 
 # implement
@@ -37,7 +38,7 @@ Issue番号を指定して手動で実行する。
 1. 次のコマンドでIssue本文とコメントを取得する。
 
    ```bash
-   gh issue view $0 --json number,title,body,comments,state,url
+   gh issue view <Issue番号> --json number,title,body,comments,state,url
    ```
 
 2. コメントから、最新の次の見出しを持つ方針シートを取得する。
@@ -59,7 +60,10 @@ Issue番号を指定して手動で実行する。
 
 4. `git status --short`を実行する。
 
-   未コミットの変更がある場合は、stash・破棄・コミットを行わず停止する。
+   未コミットの変更がある場合、対象Issueの「## 関連要件」に記載されたドキュメントパスと一致するか確認する。
+
+   - 一致しない変更、または一致するか判断できない変更が含まれる場合は、stash・破棄・コミットを行わず停止する。
+   - 「## 関連要件」に記載されたドキュメントパスとの一致のみで構成されている場合は、その変更を保持したまま次の手順へ進み、作成するIssue用ブランチへそのまま持ち越す。この場合、変更内容を報告に明記する。
 
 5. `develop`へ切り替え、最新化する。
 

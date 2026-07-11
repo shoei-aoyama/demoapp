@@ -73,8 +73,8 @@ disallowed-tools:
 | requirements    | `/requirements`    | 人間の要望を段階的に整理し、承認後に要件ドキュメントを1件作成する                     |
 | design-docs     | `/design-docs`     | 必要に応じてDatabase・API・機能・構成・意思決定の設計ドキュメントを作成または更新する |
 | issue           | `/issue`           | 要件ドキュメントを最小限の縦割りIssueへ分割し、承認後に起票する                       |
-| analyze-issue   | `/analyze-issue`   | Issue・仕様・既存コードを調査し、承認用の実装方針をIssueコメントへ記録する            |
-| implement-issue | `/implement-issue` | `develop`を最新化し、Issueブランチを作成して承認済み方針の範囲で初回実装する          |
+| analyze         | `/analyze`         | Issue・仕様・既存コードを調査し、承認用の実装方針をIssueコメントへ記録する            |
+| implement       | `/implement`       | `develop`を最新化し、Issueブランチを作成して承認済み方針の範囲で初回実装する          |
 | commit          | `/commit`          | 初回実装または追加修正を判定し、適切な単位と日本語メッセージでコミットする            |
 | review          | `/review`          | 方針逸脱・不要コード・規約・品質・セキュリティを読み取り専用で監査する                |
 | refactor        | `/refactor`        | 現在必要な最小限のリファクタリング候補だけを提案する                                  |
@@ -89,9 +89,9 @@ disallowed-tools:
 ↓
 /issue
 ↓
-/analyze-issue
+/analyze
 ↓
-/implement-issue
+/implement
 ↓
 /commit
 ↓
@@ -110,7 +110,7 @@ Geminiレビュー
 
 ### 初回コミット
 
-`/implement-issue`の直後に`/commit`を実行する。
+`/implement`の直後に`/commit`を実行する。
 
 初回実装では、新規・既存を問わず変更ファイルを1ファイルずつコミットする。
 
@@ -160,6 +160,5 @@ Geminiレビューを含むレビュー後に変更が発生した場合は、�
 - Blade / Tailwind CSS：`.claude/rules/blade-tailwind.md`
 - Database：`.claude/rules/database.md`
 - API：`.claude/rules/api.md`
-- React / TypeScript：`.claude/rules/react.md`
 
 テスト関連のSkillとRulesは、運用方針が確定するまで追加しない。

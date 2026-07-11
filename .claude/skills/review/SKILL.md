@@ -3,8 +3,6 @@ name: review
 description: Issueの承認済み実装方針、変更差分、プロジェクト規約を照合し、方針逸脱・不要コード・セキュリティ上の問題を重大度別に報告する。コードは変更しない。
 argument-hint: "[issue-number]"
 disable-model-invocation: true
-context: fork
-agent: general-purpose
 allowed-tools:
   - Read
   - Glob
@@ -50,7 +48,7 @@ disallowed-tools:
 1. 次のコマンドでIssue本文とコメントを取得する。
 
    ```bash
-   gh issue view $0 --json number,title,body,comments,state,url
+   gh issue view <Issue番号> --json number,title,body,comments,state,url
    ```
 
 2. コメントから、最新の次の見出しを持つ方針シートを取得する。
@@ -99,6 +97,8 @@ disallowed-tools:
 - ブランチ名が方針シートと一致しているか
 
 方針シートにない変更は、小規模であっても必ず指摘対象とする。
+
+ただし、Issueの「## 関連要件」に記載されたドキュメントパスと一致する変更は、`/implement`の「関連要件と一致する未コミット変更をIssue用ブランチへ持ち越す」処理によるものであり、方針外の変更として指摘しない。
 
 ### Issueとの一致
 
@@ -269,8 +269,8 @@ Issueと変更内容に関連する範囲で、次を確認する。
 
 ## 参照
 
-- `.claude/skills/analyze-issue/SKILL.md`
-- `.claude/skills/implement-issue/SKILL.md`
+- `.claude/skills/analyze/SKILL.md`
+- `.claude/skills/implement/SKILL.md`
 - `.claude/rules/project-principles.md`
 - `.claude/rules/issue-workflow.md`
 - `.claude/rules/laravel.md`

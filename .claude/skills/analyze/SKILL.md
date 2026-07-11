@@ -12,6 +12,7 @@ disallowed-tools:
   - Write
   - Edit
   - NotebookEdit
+  - Skill
 ---
 
 # analyze
@@ -39,7 +40,7 @@ Issue番号を指定し、実装前に手動で実行する。
 1. 次のコマンドでIssueを取得する。
 
    ```bash
-   gh issue view $0 --json number,title,body,labels,comments,state,url
+   gh issue view <Issue番号> --json number,title,body,labels,comments,state,url
    ```
 
 2. Issue本文とコメントから、次を整理する。

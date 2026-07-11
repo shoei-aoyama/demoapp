@@ -36,7 +36,7 @@ PRの向きは、作業ブランチから`develop`とする。
 1. 対象Issueと承認済み実装方針を取得する。
 
    ```bash
-   gh issue view $0 --json number,title,body,comments,state,url
+   gh issue view <Issue番号> --json number,title,body,comments,state,url
    ```
 
    Issueが存在しない、閉じている、または`## 実装方針（承認済み）`がない場合は停止する。
@@ -233,9 +233,8 @@ PR作成後は、人間による内容確認と`develop`へのマージを案内
 
 ## 参照
 
-- `.claude/skills/analyze-issue/SKILL.md`
-- `.claude/skills/implement-issue/SKILL.md`
+- `.claude/skills/analyze/SKILL.md`
+- `.claude/skills/implement/SKILL.md`
 - `.claude/skills/review/SKILL.md`
 - `.claude/skills/commit/SKILL.md`
 - `.claude/rules/issue-workflow.md`
-- `.github/pull_request_template.md`

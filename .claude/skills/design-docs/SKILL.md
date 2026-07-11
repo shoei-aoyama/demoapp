@@ -112,7 +112,7 @@ docs/decisions/mail-provider.md
 実装対象のIssueがある場合は、次の工程として案内する。
 
 ```text
-次は /analyze-issue <Issue番号> で、実装方針の作成を進めてください。
+次は /analyze <Issue番号> で、実装方針の作成を進めてください。
 ```
 
 ## 参照
