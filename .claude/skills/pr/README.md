@@ -1,39 +1,41 @@
 # 🚀 pr — Pull Request 作成
 
-Git Flow に沿って Pull Request を作成し、CI 監視と自己修復を行うスキル。
+コミット済みの作業ブランチをPushし、`develop`向けの通常Pull Requestを作成するスキル。
 
 ## 使い方
 
 ```
-/pr
+/pr 12
 ```
 
-## プロセス
+## パイプライン
 
-1. 現在のブランチと変更内容を確認
-2. ベースブランチを判定（`feature/*` → `develop` / `hotfix/*` → `main`）
-3. 既存 PR の有無を確認（あれば新規作成ではなく更新）
-4. `git push`（初回は `-u origin`、rebase 後は `--force-with-lease`）
-5. PR タイトル・本文を提案 → ユーザー承認
-6. `gh pr create` で PR 作成
-7. CI を監視（`gh pr checks --watch`）
-8. 失敗時は自己修復 → 完了報告
+```
+前提: /review・Geminiレビューが完了し、PR作成について人間の承認を得ていること
+読込: Issueコメントの承認済み実装方針 / develop との差分・コミット履歴
+出力: develop向け通常Pull Request
+次:   人間による確認とdevelopへのマージ
+```
 
-## CI 自己修復
+## 手順
 
-| 失敗パターン | 対応 |
-| --- | --- |
-| Prettier 未適用 | `make format` → コミット → push |
-| ESLint エラー | `make lintfix` → コミット |
-| PHP Pint 未適用 | `make pint` → コミット → push |
-| TypeScript 型エラー | 型定義を修正してコミット |
-| **PHPUnit / Jest 失敗** | **自動修正しない → ユーザーに原因確認** |
-| ビルド失敗（原因不明） | ログを報告してユーザーに相談 |
+1. 対象Issueと承認済み実装方針（`## 実装方針（承認済み）`）を取得（なければ停止）
+2. 現在のブランチ・未コミット変更・developとの差分コミットの有無を確認（`main`/`develop`上や未コミット変更があれば停止）
+3. デフォルトブランチが`develop`であることを確認
+4. 現在のブランチを対象とする既存PRがないことを確認（あれば新規作成せず停止）
+5. Issue・方針シート・コミット履歴からPRタイトル・本文を作成
+6. `git push -u origin`でPush
+7. `develop`向けの通常PR（Draftではない）を作成
+
+## PR本文の構成
+
+概要 / 主な実装 / Figma・設計書との差異（該当時）/ 本PR対象外（該当時）/ Test plan（受け入れ条件・リグレッション確認）/ `Closes #<Issue番号>`
 
 ## ルール
 
-- 承認なしに PR を作成しない
-- 1 PR = 1 機能
-- タイトルは 70 文字以内
-- `git push --force` 禁止（`--force-with-lease` のみ）
-- 同じ失敗が2回続いたらループを抜けてユーザーに報告
+- 承認なしにPRを作成しない
+- `main`向けPR・Draft PRは作成しない
+- 既存PRを更新・上書きしない
+- 実施していないテストや確認を完了扱いにしない
+- PRを自動でマージしない
+- CI監視・自動修正は行わない（このスキルの範囲外）

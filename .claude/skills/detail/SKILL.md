@@ -1,5 +1,5 @@
 ---
-name: design-docs
+name: detail
 description: 指定された種別の設計案を整理し、人間の承認後に設計ドキュメントを1件作成または更新する。
 argument-hint: "[database|api|feature|architecture|decision] [概要]"
 disable-model-invocation: true
@@ -15,7 +15,7 @@ disallowed-tools:
   - Skill
 ---
 
-# design-docs
+# detail
 
 ## 目的
 
@@ -28,11 +28,11 @@ disallowed-tools:
 ## 使用方法
 
 ```text
-/design-docs database お問い合わせデータの保存設計
-/design-docs api お問い合わせ送信API
-/design-docs feature お問い合わせ機能
-/design-docs architecture メール送信構成
-/design-docs decision メール送信方式の選定
+/detail database お問い合わせデータの保存設計
+/detail api お問い合わせ送信API
+/detail feature お問い合わせ機能
+/detail architecture メール送信構成
+/detail decision メール送信方式の選定
 ```
 
 ## 種別
@@ -109,10 +109,10 @@ docs/decisions/mail-provider.md
 - 未決事項
 - 関連する要件・Issue
 
-実装対象のIssueがある場合は、次の工程として案内する。
+次の工程として案内する。
 
 ```text
-次は /analyze <Issue番号> で、実装方針の作成を進めてください。
+次は /issue <要件ドキュメントのパス> で、Issueへの分割と起票を進めてください。
 ```
 
 ## 参照

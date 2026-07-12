@@ -4,10 +4,20 @@
 
 ## 開発フロー
 
+### 初回チェーン（プロジェクト全体の大元要件・最初の1回だけ）
+
 ```text
 /requirements
 ↓
-必要に応じて /design-docs
+/more-requirements
+↓
+/detail
+```
+
+### 日常の開発フロー（新機能・修正・改善のたびに）
+
+```text
+/plan-docs
 ↓
 /issue
 ↓
@@ -30,7 +40,7 @@ Geminiレビュー
 developへマージ
 ```
 
-`/design-docs`は、Database・API・機能・アーキテクチャ・技術選定などの設計ドキュメントが必要な場合だけ実行する。
+`/requirements` → `/more-requirements` → `/detail`はプロジェクト全体の大元要件を作る最初の1回だけ実行し、以降は再実行しない。個別の新機能・修正・改善の要件定義（技術設計を含む）は`/plan-docs`から始める。
 
 1回目の`/commit`では、初回実装を1ファイルずつコミットする。
 

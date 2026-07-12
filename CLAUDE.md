@@ -71,7 +71,7 @@ project/
 仕様駆動開発（SDD）に基づき、**仕様を先に書き、仕様に対して実装する。**
 
 ```
-1. 仕様作成（/requirements → /feature-design → /db-design → /api-design）
+1. 仕様作成（初回のみ /requirements → /more-requirements → /detail。以降は /plan-docs）
 2. 仕様レビュー
 3. 実装（/implement：仕様を入力として）
 4. テスト（/test-gen：仕様との整合性を検証）
