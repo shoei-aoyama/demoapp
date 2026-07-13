@@ -3,7 +3,7 @@
        pint stan lint lintfix format typecheck \
        api-export run-daily-batches run-monthly-batches \
        shell-backend shell-frontend logs logs-frontend \
-       e2e report
+       e2e report github-labels
 
 # デフォルト
 help: ## ヘルプ表示
@@ -29,6 +29,14 @@ install: ensure-env ## 初期セットアップ（クローン直後の初回の
 	@echo " frontend は entrypoint が npm install を実行するため、初回起動時"
 	@echo " のみ数分かかります。進行状況は make logs-frontend で確認可能。"
 	@echo "==================================================================="
+
+github-labels: ## GitHub Issue運用に必要なラベル(feat/fix/refactor/docs/style/chore)を作成（新規プロジェクトで1回実行）
+	gh label create "feat" --description "新機能" --color "0e8a16" --force
+	gh label create "fix" --description "不具合修正" --color "d93f0b" --force
+	gh label create "refactor" --description "挙動を変えないコード整理" --color "fbca04" --force
+	gh label create "docs" --description "ドキュメント変更" --color "1d76db" --force
+	gh label create "style" --description "CSS・表示上の変更" --color "c5def5" --force
+	gh label create "chore" --description "設定・環境・CI・保守作業" --color "cfd3d7" --force
 
 ensure-env: ## .env を生成し HOST_UID/HOST_GID を補完（既存 .env も対象）
 	@test -f .env || ( cp .env.example .env && echo ".env を .env.example から生成しました" )
