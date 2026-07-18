@@ -21,7 +21,7 @@ disallowed-tools:
 
 `/requirements`で作成した大枠の要件ドキュメントを入力に、実装着手に十分な詳細度まで要件を深掘りする。
 
-プロジェクト全体の大元要件を定義する最初の1回だけのルート（`/requirements` → `/more-requirements` → `/detail`）で使用する。個別の新機能・修正・改善は`/plan-docs`を起点とする。
+プロジェクト全体の大元要件を定義する最初の1回だけのルート（`/requirements` → `/more-requirements` → `/detail`）で使用する。個別の新機能・修正・改善は`/make-docs`を起点とする。
 
 新規ドキュメントの作成、技術設計、Issue起票、コード調査、実装は行わない。
 
