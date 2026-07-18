@@ -1,27 +1,27 @@
-# 📝 plan-docs — 新機能・修正の要件〜技術設計
+# 📝 make-docs — 新機能・修正の要件〜技術設計
 
-新機能追加・修正・改善の要望を、必要に応じて技術設計まで含めて1つのドキュメントに整理するスキル。
+新機能追加・修正・改善・デザイン基盤方針の要望を、必要に応じて技術設計まで含めて1つのドキュメントに整理するスキル。
 
 プロジェクトの大元要件が完了した後の、日常的な入口。
 
 ## 使い方
 
 ```
-/plan-docs お問い合わせフォームにファイル添付を追加したい
-/plan-docs docs/maintenance/contact-attachment.md
+/make-docs お問い合わせフォームにファイル添付を追加したい
+/make-docs docs/maintenance/contact-attachment.md
 ```
 
 ## パイプライン
 
 ```
 前提: /requirements → /more-requirements → /detail の初回チェーンが完了していること
-出力: docs/requirements/（新機能）または docs/maintenance/（修正・改善）
+出力: docs/requirements/（新機能）、docs/maintenance/（修正・改善）、docs/design/（デザイン・基盤方針）のいずれか
 次:   /issue
 ```
 
 ## プロセス
 
-1. 新機能か修正・改善かを判別
+1. 新機能か修正・改善かデザイン・基盤方針かを判別
 2. 目的・背景・利用者（新規時）・必要な挙動・受け入れ条件・対象外・制約を2〜3問ずつヒアリング
 3. DB・API・画面挙動・構成などの技術設計が必要な変更のみ、その範囲を追加でヒアリング
 4. 承認後、種別に応じた保存先へ1件作成または更新
