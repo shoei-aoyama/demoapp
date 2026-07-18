@@ -49,6 +49,7 @@ project/
 ├── docs/                        # 仕様・設計ドキュメント
 │   ├── README.md                # オンボーディング起点（新規参画者の入口）
 │   ├── requirements/            # 要件定義書
+│   ├── design/                  # デザイン・基盤方針（デザインシステム・トンマナ刷新など）
 │   ├── features/                # 機能設計書（機能一覧・画面フロー・状態遷移）
 │   ├── decisions/               # ADR（アーキテクチャ決定記録）
 │   ├── api/                     # API仕様（自サービスが提供する正本）
@@ -71,7 +72,7 @@ project/
 仕様駆動開発（SDD）に基づき、**仕様を先に書き、仕様に対して実装する。**
 
 ```
-1. 仕様作成（初回のみ /requirements → /more-requirements → /detail。以降は /plan-docs）
+1. 仕様作成（初回のみ /requirements → /more-requirements → /detail。以降は /make-docs）
 2. 仕様レビュー
 3. 実装（/implement：仕様を入力として）
 4. テスト（/test-gen：仕様との整合性を検証）
@@ -100,8 +101,10 @@ main       ← 本番。直接コミット禁止
 develop    ← ステージング。機能ブランチのマージ先
   ├── feat/#123-user-registration       ← 新機能
   ├── fix/#456-csv-export-bug           ← バグ修正（緊急修正含む）
-  └── refactor/#789-auth-logic          ← リファクタリング
+  ├── refactor/#789-auth-logic          ← リファクタリング
+  └── docs/user-registration            ← ドキュメント作成（/make-docs、Issue番号なし）
 # 命名規則: <type>/#<Issue番号>-<内容の kebab-case>
+# docsブランチのみ例外でIssue番号なし（ドキュメント作成時点ではIssueが未起票のため）
 # すべてのブランチは develop から作成する（緊急修正も例外なし、`hotfix` type は廃止）
 # 緊急バグ修正も fix/ を使う。緊急性は GitHub のラベル等で表現する
 ```
