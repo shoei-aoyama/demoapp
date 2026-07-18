@@ -73,7 +73,7 @@ disallowed-tools:
 | requirements     | `/requirements`     | 【初回のみ】プロジェクト全体の大元となる要件を最初の1回だけ整理し、承認後にドキュメントを1件作成する |
 | more-requirements | `/more-requirements` | 【初回のみ】`/requirements`が作成したドキュメントを実装着手可能な粒度まで詳細化する    |
 | detail           | `/detail`           | 【初回のみ】Database・API・機能・構成・意思決定の設計ドキュメントを作成または更新する  |
-| plan-docs        | `/plan-docs`        | 【日常の入口】新機能・修正・改善の要望を、必要に応じて技術設計まで含めて1件のドキュメントに整理する |
+| make-docs        | `/make-docs`        | 【日常の入口】新機能・修正・改善・デザイン基盤方針の要望を、必要に応じて技術設計まで含めて1件のドキュメントに整理する |
 | issue            | `/issue`            | 要件ドキュメントを最小限の縦割りIssueへ分割し、承認後に起票する                       |
 | analyze          | `/analyze`          | Issue・仕様・既存コードを調査し、承認用の実装方針をIssueコメントへ記録する            |
 | implement        | `/implement`        | `develop`を最新化し、Issueブランチを作成して承認済み方針の範囲で初回実装する          |
@@ -96,10 +96,10 @@ disallowed-tools:
 
 ### 日常の開発フロー（新機能・修正・改善のたびに）
 
-`/requirements` → `/more-requirements` → `/detail`は再実行しない。`/plan-docs`が入口になる。
+`/requirements` → `/more-requirements` → `/detail`は再実行しない。`/make-docs`が入口になる。
 
 ```text
-/plan-docs
+/make-docs
 ↓
 /issue
 ↓

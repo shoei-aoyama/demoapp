@@ -17,7 +17,7 @@
 ### 日常の開発フロー（新機能・修正・改善のたびに）
 
 ```text
-/plan-docs
+/make-docs
 ↓
 /issue
 ↓
@@ -40,7 +40,7 @@ Geminiレビュー
 developへマージ
 ```
 
-`/requirements` → `/more-requirements` → `/detail`はプロジェクト全体の大元要件を作る最初の1回だけ実行し、以降は再実行しない。個別の新機能・修正・改善の要件定義（技術設計を含む）は`/plan-docs`から始める。
+`/requirements` → `/more-requirements` → `/detail`はプロジェクト全体の大元要件を作る最初の1回だけ実行し、以降は再実行しない。個別の新機能・修正・改善の要件定義（技術設計を含む）は`/make-docs`から始める。
 
 1回目の`/commit`では、初回実装を1ファイルずつコミットする。
 
@@ -133,6 +133,24 @@ git push -u origin "feat/#12-contact-form"
 - 同名ブランチが存在しない
 
 未コミット変更を勝手にstash・破棄・コミットしない。
+
+### ドキュメント作成用ブランチ（例外）
+
+`/make-docs`によるドキュメント作成・更新は、Issueが存在する前に行うため、Issue番号を持たない専用ブランチを使う。
+
+形式:
+
+```text
+docs/<内容の kebab-case>
+```
+
+作成前に、次を確認する。
+
+- 作業ツリーに未コミット変更がない
+- `git pull --ff-only origin develop`で`develop`を最新化できる
+- 同名ブランチが存在しない
+
+`develop`から作成し、単独のPull Requestで`develop`へマージする。`/issue`は、このPRがマージされた後の最新`develop`を対象に実行する。
 
 ## コミット
 

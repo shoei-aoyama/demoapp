@@ -2,7 +2,7 @@
 
 `/requirements`で作成した大枠の要件ドキュメントを、実装着手可能な粒度まで深掘りするスキル。
 
-プロジェクト全体の大元要件を定義する最初の1回だけのルート（`/requirements` → `/more-requirements` → `/detail`）で使用する。個別の新機能・修正・改善は`/plan-docs`が起点。
+プロジェクト全体の大元要件を定義する最初の1回だけのルート（`/requirements` → `/more-requirements` → `/detail`）で使用する。個別の新機能・修正・改善は`/make-docs`が起点。
 
 ## 使い方
 
