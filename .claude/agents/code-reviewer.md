@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: バックエンド・フロントエンドのコードレビューを行う
+description: Laravel（Controller/Model/Blade）のコードレビューを行う
 model: sonnet
 tools:
   - Read
@@ -16,7 +16,7 @@ maxTurns: 30
 
 # Code Reviewer
 
-futsuu-db プロジェクトのコードレビューを行う。
+demoapp プロジェクトのコードレビューを行う。
 CLAUDE.md のアーキテクチャ・コーディング規約に準拠しているかを検証する。
 
 ## レビュー対象の特定
@@ -58,120 +58,54 @@ git diff origin/develop...HEAD                # 差分内容
 
 ## レビュー観点
 
-### バックエンド（backend/）
+### Controller / HTTP 層
 
-#### Controller / HTTP 層
-
-- Controller にビジネスロジックが漏れていないか（Action に委譲すべき）
-- FormRequest でバリデーションが定義されているか
+- Controller にビューへの整形以上の複雑な業務処理が漏れていないか
+- FormRequest でバリデーションが定義されているか（単純な検証は Controller 内で完結してよい）
 - FormRequest に `attributes()` メソッドがあり、項目名が日本語で返されているか
-- FormRequest の `authorize()` で認可ロジックが適切に実装されているか
-- Resource でレスポンス整形されているか
-- Action はメソッドインジェクションで受け取っているか
-- 不要な try-catch がないか（例外処理は `Handler.php` で一元管理すべき。Controller で catch して再 throw するだけのコードは不要）
+- FormRequest の `authorize()` で認可ロジックが適切に実装されているか（認証機能導入後）
+- 不要な try-catch がないか（例外処理は `Handler.php` で一元管理すべき）
+- Repository・Service・UseCases など、CLAUDE.md にない独自レイヤーを追加していないか
 
-#### Action（UseCases/）
-
-- `__invoke()` で単一責務になっているか
-- Action 間の呼び出しをしていないか
-- Repository・Service はコンストラクタインジェクションで受け取っているか
-- Eloquent を直接使っていないか（Repository に委譲しているか）
-- 複数 Repository/Service 使用時に `DB::transaction()` で管理しているか
-- Service とのトランザクションネストが発生していないか
-
-#### Repository
-
-- インターフェースが `Interfaces/Repositories/` に定義され `AppServiceProvider` で DI バインドされているか
-- Eloquent の操作が Repository 内に閉じているか
-- Repository 間の呼び出しをしていないか
-
-#### Model
+### Model
 
 - `HasFactory` トレイトが付いているか
-- `SoftDeletes` トレイトが付いているか（主要エンティティ）
 - `$fillable` が明示定義されているか（`$guarded = []` 禁止）
 - `$casts` が Enum・datetime・boolean・array に定義されているか
 - リレーションが適切に定義されているか（belongsTo, hasMany, belongsToMany）
 - N+1 問題: `with()` で Eager Loading されているか
 
-#### Migration
+### Migration
 
-- ID カラム: `$table->id()` または UUID 型が適切に選択されているか
-- タイムスタンプに `$table->datetimes()` を使っているか
-- 主要エンティティに `$table->softDeletesDatetime()` があるか
+- テーブル名: 複数形 `snake_case`、カラム名: `snake_case`
+- 主キー: `bigint` AUTO_INCREMENT
 - 外部キー制約が適切に定義されているか
 - 検索・ソートに使うカラムにインデックスが貼られているか
 
-#### Service
+### Blade / Tailwind
 
-- 外部 API・技術的処理のみか（ビジネスフローの組み立て禁止）
-- インターフェースが `Interfaces/Services/` に定義され `AppServiceProvider` で DI バインドされているか
-- 外部 API 呼び出しに try-catch でエラーハンドリングされているか
-- エラー時に `Log::error()` でログ記録されているか
+- DB アクセスや複雑な業務処理が Blade 内に書かれていないか
+- フォームに `@csrf`、必要に応じて `@method` があるか
+- 入力値の再表示に `old()` を使っているか
+- バリデーションエラーが対象項目の近くに表示されているか
+- ユーザー入力やDB由来の値が `{{ }}` でエスケープ出力されているか（`{!! !!}` の無検証使用がないか）
+- 既存レイアウト・コンポーネントを再利用しているか（重複実装がないか）
 
-#### Enum
+### カート（Session）
 
-- 日本語ラベルを返すメソッドが定義されているか（例: `getStatus()`, `label()` 等）
-- Model の `$casts` で Enum クラスにキャストされているか
-- Enum の値が Migration の型・制約と整合しているか
+- カート情報が Session で保持され、DB に永続化されていないか
+- カート内商品の数量変更・個別削除・全削除が正しく動作するか
+- 販売停止商品が注文確定時に適切にエラーとなるか
 
-#### テスト
+### テスト
 
-- 新規・変更した Action にテストがあるか
-- テストのディレクトリ構造が本体とミラーリングされているか（`tests/Unit/UseCase/` ↔ `app/UseCases/`）
+- 新規・変更した Controller / Model にテストがあるか
 - `use RefreshDatabase` が付いているか
-- 取得系: データ取得・フィルタリング・スコープをテスト
+- 取得系: データ取得・フィルタリングをテスト
 - 作成系: データ保存・関連テーブル更新をテスト
 - 更新系: データ更新・他レコードへの影響なしをテスト
-- 削除系: データ削除（論理削除）・他レコードへの影響なしをテスト
+- 削除系: データ削除・他レコードへの影響なしをテスト
 - テストメソッド名が日本語で意図が明確か
-
-### フロントエンド（frontend/）
-
-#### ページ構成（App Router）
-
-- ルートグループ `({アカウント種別})/` が適切に使い分けられているか
-- 機能ごとに `features/{機能名}/` 配下にコードが配置されているか
-
-#### レンダリング戦略
-
-- `"use client"` が不必要に付いていないか（Server Component で済むものはないか）
-- Server Component と Client Component の境界が適切か
-
-#### 型定義
-
-- `any` を使っていないか（`unknown` を使うべき）
-- API レスポンスの型がバックエンドの Resource と一致しているか
-- date 系フィールドが `string` 型になっているか（ISO 8601）
-
-#### カスタムフック
-
-- useState で状態管理（data, loading, error）しているか
-- useCallback で関数がメモ化されているか
-- 不要な `useMemo` / `useCallback` でかえってパフォーマンスを劣化させていないか
-- useEffect の依存配列が正しいか（過不足がないか）
-- エラーハンドリングが try-catch で行われているか
-
-#### API 通信
-
-- `lib/fetch.ts` の `http()` を使っているか（直接 fetch 禁止）
-- 非同期処理が `async/await` で書かれているか（`.then()` 禁止）
-
-#### UI / スタイリング
-
-- HeroUI コンポーネントを活用しているか（独自実装の重複がないか）
-- Tailwind CSS でスタイリングされているか
-- フォームに react-hook-form + yup を使っているか
-- リスト描画時の `key` が一意な ID か（配列 index を key にしていないか）
-- フォーム要素に適切な `label` が紐付いているか
-
-#### 配置ルール
-
-- 機能固有コードが `features/{機能名}/` に閉じているか
-- features 間の依存が型の import のみか（hooks / api の直接参照禁止）
-- 共通 UI → `components/elements/`
-- 共通フック → `hooks/`
-- ユーティリティ → `lib/` or `utils/`
 
 ### 共通
 
@@ -190,14 +124,12 @@ git diff origin/develop...HEAD                # 差分内容
 - ユーザー入力が適切にバリデーションされているか
 - SQL インジェクション・XSS のリスクがないか
 - エラーレスポンスに内部情報（スタックトレース、SQL）が漏れていないか
-- Mass Assignment: `$fillable` に不要なカラム（role, is_admin 等）が含まれていないか
-- 認証が必要なルートに適切な認証 Middleware が適用されているか
+- Mass Assignment: `$fillable` に不要なカラムが含まれていないか
 
 #### パフォーマンス
 
 - N+1 問題が発生していないか
 - 大量データの一括取得がないか（chunk / cursor の検討）
-- 不要な再レンダリングがないか
 
 ## 出力形式
 

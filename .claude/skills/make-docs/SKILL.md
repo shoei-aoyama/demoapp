@@ -161,7 +161,6 @@ GOサインを得た場合のみ、次の手順でドキュメントを作成ま
 - `.claude/rules/project-principles.md`
 - `.claude/rules/laravel.md`
 - `.claude/rules/database.md`
-- `.claude/rules/api.md`
 - `docs/requirements/`
 - `docs/maintenance/`
 - `docs/design/`

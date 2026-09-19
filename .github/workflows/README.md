@@ -103,7 +103,6 @@ PR で発火する品質ゲートワークフロー。整形・静的解析・�
 | ジョブ | 内容 |
 | --- | --- |
 | **backend** | Pint（整形チェック）/ PHPStan（静的解析）/ PHPUnit（カバレッジ計測）/ octocov（PR コメント・80% 閾値判定） |
-| **frontend** | ESLint（warnings 含めて 0 必須）/ Prettier（整形チェック）/ tsc（型チェック） |
 
 #### backend ジョブの詳細
 
@@ -113,13 +112,6 @@ PR で発火する品質ゲートワークフロー。整形・静的解析・�
 - **PHPStan**: baseline で抑制済みの既存エラーは無視し、新規エラーのみ fail
 - **PHPUnit**: `--coverage-clover=coverage.xml` でカバレッジを計測
 - **octocov**: カバレッジ 80% 未満の PR を fail・結果を PR にコメント
-
-#### frontend ジョブの詳細
-
-- **Node.js バージョン**: 22
-- **ESLint**: `--max-warnings 0` で warning も fail 扱い
-- **Prettier**: `--check` モードで差分検出時に exit 1
-- **tsc**: `--noEmit` で型エラーを検出
 
 #### 必要な権限
 
