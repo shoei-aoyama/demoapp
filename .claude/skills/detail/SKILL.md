@@ -120,9 +120,7 @@ docs/decisions/mail-provider.md
 - `.claude/rules/project-principles.md`
 - `.claude/rules/laravel.md`
 - `.claude/rules/database.md`
-- `.claude/rules/api.md`
 - `docs/database/`
-- `docs/api/`
 - `docs/features/`
 - `docs/architecture/`
 - `docs/decisions/`

@@ -173,6 +173,5 @@ Geminiレビューを含むレビュー後に変更が発生した場合は、�
 - Laravel：`.claude/rules/laravel.md`
 - Blade / Tailwind CSS：`.claude/rules/blade-tailwind.md`
 - Database：`.claude/rules/database.md`
-- API：`.claude/rules/api.md`
 
 テスト関連のSkillとRulesは、運用方針が確定するまで追加しない。
