@@ -2,11 +2,6 @@
 
 応答・コード内コメント・コミットメッセージはすべて日本語で記述する。
 
-各サブディレクトリの CLAUDE.md も自動でロードされる。
-
-- `backend/` 作業時は `backend/CLAUDE.md` を参照
-- `frontend/` 作業時は `frontend/CLAUDE.md` を参照
-
 ---
 
 ## マーキング定義
@@ -21,16 +16,17 @@
 
 ## プロジェクト定義
 
-| 項目                 | 値                                                                                                                                     |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 構成                 | モノレポ（`frontend/` + `backend/`）                                                                                                   |
-| フロントエンド       | TypeScript 5, Next.js 16 (App Router), React 19, Tailwind CSS 4, Radix UI                                                              |
-| バックエンド         | PHP 8.4, Laravel 12                                                                                                                    |
-| DB                   | MySQL 8.4 LTS                                                                                                                          |
-| インフラ             | Docker, Terraform (AWS)                                                                                                                |
-| パッケージマネージャ | npm (frontend), Composer (backend)                                                                                                     |
-| タスクランナー       | Makefile                                                                                                                               |
-| 認証                 | 管理者: Google OAuth（Laravel Socialite）+ メアドホワイトリスト + Sanctum セッション。ユーザー: Laravel Sanctum（メアド + パスワード） |
+| 項目                 | 値                                                                |
+| -------------------- | ------------------------------------------------------------------ |
+| 位置づけ             | AIを使ったLaravel新規開発をその場で見せるための小規模デモアプリ    |
+| 構成                 | 単一 Laravel アプリ（フロントエンドの分離なし、Blade で画面を構築） |
+| バックエンド         | PHP 8.4, Laravel 11                                                |
+| ビュー               | Blade, Tailwind CSS                                                |
+| DB                   | MySQL 8.4 LTS                                                      |
+| インフラ             | Docker                                                             |
+| パッケージマネージャ | Composer                                                           |
+| タスクランナー       | Makefile                                                           |
+| 認証                 | 初期実装ではなし（後日 AI に追加させるデモ候補）                   |
 
 ---
 
@@ -44,23 +40,32 @@ project/
 │   ├── settings.json            # 権限・hooks 設定
 │   ├── settings.local.json      # ローカル設定（.gitignore 対象）
 │   ├── agents/                  # 特化型AIエージェント
+│   ├── rules/                   # レビュー観点別の詳細ルール
 │   └── skills/                  # 再利用可能なAIワークフロー（スラッシュコマンド）
 ├── .mcp.json                    # GitHub MCP 設定
 ├── docs/                        # 仕様・設計ドキュメント
 │   ├── README.md                # オンボーディング起点（新規参画者の入口）
 │   ├── requirements/            # 要件定義書
-│   ├── design/                  # デザイン・基盤方針（デザインシステム・トンマナ刷新など）
+│   ├── design/                  # デザイン・基盤方針
 │   ├── features/                # 機能設計書（機能一覧・画面フロー・状態遷移）
-│   ├── decisions/               # ADR（アーキテクチャ決定記録）
-│   ├── api/                     # API仕様（自サービスが提供する正本）
-│   ├── database/                # DB設計
-│   ├── runbooks/                # 運用手順書（setup / deployment / incident-response 等）
-│   ├── reference/               # 既知の罠・Enum 一覧などのリファレンス
-│   ├── integrations/            # 連携開発の基本ルール
-│   └── maintenance/             # 進行中の連携案件（{連携先}/ 配下に進行中ドキュ）
-├── backend/                     # Laravel
-├── frontend/                    # Next.js
-├── infra/                       # Terraform
+│   ├── decisions/                # ADR（アーキテクチャ決定記録）
+│   ├── api/                     # API仕様（将来 API 化する場合のみ使用）
+│   ├── database/                # DB設計（ER図・テーブル定義）
+│   ├── runbooks/                # 運用手順書
+│   ├── reference/                # 既知の罠などのリファレンス
+│   ├── integrations/             # 外部連携の基本ルール（現状未使用）
+│   └── maintenance/              # 進行中の保守案件
+├── app/                          # Laravel アプリケーションコード
+│   ├── Http/
+│   │   ├── Controllers/          # Request受付・View返却・リダイレクト
+│   │   └── Requests/             # FormRequest（バリデーション）
+│   └── Models/                   # Eloquent（リレーション・Attribute）
+├── resources/views/              # Blade テンプレート
+├── routes/web.php                # ルーティング
+├── database/
+│   ├── migrations/
+│   └── seeders/
+├── docker/
 ├── docker-compose.yml
 ├── Makefile
 ├── .gitignore
@@ -77,6 +82,70 @@ project/
 3. 実装（/implement：仕様を入力として）
 4. テスト（/test-gen：仕様との整合性を検証）
 ```
+
+---
+
+## アプリケーション設計
+
+### 基本方針
+
+[MUST] Controller / FormRequest / Model / Blade の標準構成のみを使う。Repository・Service・UseCases など独自レイヤーは追加しない
+[MUST] Controller で Eloquent を直接操作してよい
+[MUST] 複数項目の入力検証や再利用される検証は FormRequest へ分離する。単純な検証は Controller 内で完結してよい
+[MUST] ビューは Blade を使用し、DB アクセスや複雑な業務処理を Blade 内に書かない
+[MUST] カート情報は Session で保持する（DB に永続化しない）
+[SHOULD] Controller が明確に肥大化する場合のみ、Laravel 標準機能（FormRequest, Policy 等）で分離を検討する
+
+### 実装順序
+
+```
+1. Migration + Model（リレーション定義）
+2. FormRequest（バリデーション）
+3. Controller + ルーティング
+4. Blade ビュー
+```
+
+### DB 設計規約
+
+[MUST] テーブル名: 複数形 `snake_case`
+[MUST] カラム名: `snake_case`
+[MUST] 主キー: `bigint` AUTO_INCREMENT
+[MUST] 外部キー: `{単数形テーブル名}_id`
+[MUST] 必須カラム: `id`, `created_at`, `updated_at`
+
+詳細は `.claude/rules/database.md` を参照。
+
+### コーディング規約
+
+[MUST] 1関数 = 1責務
+[MUST] マジックナンバー禁止（定数化）
+[SHOULD] ネスト最大3階層（早期リターン）
+例外: アルゴリズム上やむを得ない場合はレビュアーと合意
+
+[MUST] 未使用コード即削除
+[MUST] PSR-12 準拠、`make pint` でフォーマット
+[MUST] 型宣言（引数・戻り値）必須
+[MUST] クラス参照は `use` 文でインポートして短縮名を使う
+
+| 対象             | 規則               |
+| ---------------- | ------------------ |
+| 変数・メソッド   | `camelCase`        |
+| クラス           | `PascalCase`       |
+| 定数             | `UPPER_SNAKE_CASE` |
+| テーブル・カラム | `snake_case`       |
+
+### エラーハンドリング
+
+[MUST] 想定内（バリデーション等）と想定外（障害）を区別
+[MUST] 握りつぶし禁止。想定外は必ずログ記録
+[MUST] ユーザーに内部情報（スタックトレース、SQL）を返さない
+[MUST] `dd()`、`dump()` などのデバッグコードを残さない
+
+### テスト（PHPUnit）
+
+- `tests/Unit/`: 単体テスト
+- `tests/Feature/`: 結合テスト（画面・エンドポイント単位）
+- メソッド名は日本語可: `test_カートに商品を追加できる()`
 
 ---
 
@@ -130,7 +199,7 @@ develop    ← ステージング。機能ブランチのマージ先
 ### マージ戦略
 
 | マージ方向               | マージ方法                              | 理由                                     |
-| ------------------------ | --------------------------------------- | ---------------------------------------- |
+| ------------------------ | ---------------------------------------- | ----------------------------------------- |
 | タスクブランチ → develop | **Squash and merge**                    | 作業コミットを整理して履歴をきれいに保つ |
 | develop → main           | **Create a merge commit（通常マージ）** | 履歴を繋げて次回PRの差分を正しく保つ     |
 
@@ -189,35 +258,16 @@ make migrate              # マイグレーション
 make seed                 # シーディング
 make test                 # PHPUnit
 make pint                 # PHP フォーマット
-make lint / lintfix       # Next.js リント
-make format               # Next.js フォーマット
-make typecheck            # Next.js 型チェック（tsc --noEmit）
-make api-export           # OpenAPI YAML エクスポート
-make run-daily-batches    # 日次バッチ
-make run-monthly-batches  # 月次バッチ
+make stan                 # PHP 静的解析（PHPStan）
 ```
 
 ### アクセス先
 
-| サービス         | URL                            |
-| ---------------- | ------------------------------ |
-| フロントエンド   | http://localhost:3000          |
-| バックエンド API | http://localhost:8000          |
-| API ドキュメント | http://localhost:8000/docs/api |
-| Swagger UI       | http://localhost:8082          |
-| phpMyAdmin       | http://localhost:8080          |
-| MailHog          | http://localhost:8025          |
-
----
-
-## サービス間連携
-
-詳細は `docs/integrations/` を参照。
-
-[MUST] 他サービスの内部 docs は参照しない。API 仕様等の接点情報は自サービス内に持つ
-[MUST] 自サービスが提供する API の仕様は `docs/api/` に正本を置く
-
-[SHOULD] 連携案件の進行中は `docs/maintenance/{連携先}/` で管理し、完了後に正式ドキュメントへ統合する
+| サービス   | URL                    |
+| ---------- | ---------------------- |
+| バックエンド | http://localhost:8000 |
+| phpMyAdmin | http://localhost:8080  |
+| MailHog    | http://localhost:8025  |
 
 ---
 
