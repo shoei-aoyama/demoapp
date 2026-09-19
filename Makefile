@@ -1,9 +1,8 @@
 .PHONY: help install ensure-env up down clean restart build \
        fresh migrate seed test test-coverage \
-       pint stan lint lintfix format typecheck \
-       api-export run-daily-batches run-monthly-batches \
-       shell-backend shell-frontend logs logs-frontend \
-       e2e report github-labels
+       pint stan \
+       shell-backend logs \
+       github-labels
 
 # デフォルト
 help: ## ヘルプ表示
@@ -22,12 +21,8 @@ install: ensure-env ## 初期セットアップ（クローン直後の初回の
 	@echo " セットアップ完了"
 	@echo "-------------------------------------------------------------------"
 	@echo "  backend:    http://localhost:8000"
-	@echo "  frontend:   http://localhost:3000"
 	@echo "  phpMyAdmin: http://localhost:8080"
 	@echo "  MailHog:    http://localhost:8025"
-	@echo ""
-	@echo " frontend は entrypoint が npm install を実行するため、初回起動時"
-	@echo " のみ数分かかります。進行状況は make logs-frontend で確認可能。"
 	@echo "==================================================================="
 
 github-labels: ## GitHub Issue運用に必要なラベル(feat/fix/refactor/docs/style/chore)を作成（新規プロジェクトで1回実行）
@@ -62,9 +57,6 @@ build: ## コンテナビルド
 logs: ## 全コンテナのログ表示
 	@docker compose logs -f || true
 
-logs-frontend: ## frontend のログ表示（npm install の進行確認に使う）
-	@docker compose logs -f frontend || true
-
 # --- DB ---
 fresh: ## DB初期化 + シード
 	docker compose exec backend php artisan migrate:fresh --seed
@@ -82,36 +74,13 @@ test: ## PHPUnit実行
 test-coverage: ## PHPUnit実行（カバレッジ計測。CI と同じ。pcov 必須）
 	docker compose exec backend ./vendor/bin/phpunit --coverage-clover=coverage.xml
 
-# --- フォーマット・リント（バックエンド）---
+# --- フォーマット・リント ---
 pint: ## PHP フォーマット（Laravel Pint）
 	docker compose exec backend ./vendor/bin/pint
 
 stan: ## PHP 静的解析（PHPStan / larastan）
 	docker compose exec backend ./vendor/bin/phpstan analyse --memory-limit=2G --no-progress
 
-# --- フォーマット・リント（フロントエンド）---
-lint: ## Next.js リント
-	docker compose exec frontend npm run lint
-
-lintfix: ## Next.js リント（自動修正）
-	docker compose exec frontend npm run lint -- --fix
-
-format: ## Next.js フォーマット（Prettier）
-	docker compose exec frontend npx prettier --write "src/**/*.{ts,tsx,js,jsx,json,css}"
-
-typecheck: ## Next.js 型チェック（tsc --noEmit）
-	docker compose exec -T frontend npx tsc --noEmit
-
 # --- シェル ---
 shell-backend: ## バックエンドコンテナにログイン
 	docker compose exec backend bash
-
-shell-frontend: ## フロントエンドコンテナにログイン
-	docker compose exec frontend sh
-
-# --- Playwright（E2E はホスト Node 実行。事前に frontend で npm install + npx playwright install chromium が必要）---
-e2e: ## E2E テスト実行（ホスト Node）
-	cd frontend && npm run e2e
-
-report: ## E2E テスト結果のレポート表示（ホスト Node）
-	cd frontend && npx playwright show-report
