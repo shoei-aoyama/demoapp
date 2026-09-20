@@ -61,11 +61,11 @@ class OrderController extends Controller
         return redirect()->route('orders.complete', $order);
     }
 
-    public function complete(Order $order): View
+    public function complete(int $order): View
     {
-        abort_unless(in_array($order->id, session('order_ids', [])), 404);
+        abort_unless(in_array($order, session('order_ids', [])), 404);
 
-        $order->load('items.product');
+        $order = Order::with('items.product')->findOrFail($order);
 
         return view('orders.complete', compact('order'));
     }

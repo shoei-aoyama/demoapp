@@ -22,7 +22,6 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware('test.auth')->group(function () {
     Route::get('/checkout', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/checkout', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{order}/complete', [OrderController::class, 'complete'])->name('orders.complete');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 });
-
-Route::get('/orders/{order}/complete', [OrderController::class, 'complete'])->name('orders.complete');
-Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
