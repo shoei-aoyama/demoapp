@@ -11,7 +11,7 @@
         <img
             src="{{ $product->image }}"
             alt="{{ $product->name }}"
-            class="w-full rounded-xl border border-gray-200 object-cover"
+            class="aspect-square w-full rounded-xl object-cover shadow-sm"
         >
 
         <div>
@@ -23,7 +23,7 @@
                 @csrf
                 <button
                     type="submit"
-                    class="w-full rounded-lg bg-gray-900 px-6 py-3 font-semibold text-white transition hover:bg-gray-700"
+                    class="w-full rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700"
                 >
                     カートに追加
                 </button>

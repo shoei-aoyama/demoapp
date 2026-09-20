@@ -12,22 +12,22 @@
     @endif
 
     @if ($items->isEmpty())
-        <p class="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
+        <p class="rounded-lg bg-white p-8 text-center text-gray-500 shadow-sm">
             カートに商品がありません。
-            <a href="{{ route('products.index') }}" class="text-gray-900 underline">商品一覧を見る</a>
+            <a href="{{ route('products.index') }}" class="text-red-600 underline">商品一覧を見る</a>
         </p>
     @else
         <div class="space-y-4">
             @foreach ($items as $item)
                 @php $product = $item['product']; @endphp
-                <div class="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4">
-                    <img src="{{ $product->image }}" alt="{{ $product->name }}" class="h-20 w-20 rounded-lg object-cover">
+                <div class="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm">
+                    <img src="{{ $product->image }}" alt="{{ $product->name }}" class="aspect-square h-20 w-20 rounded-lg object-cover">
 
                     <div class="flex-1">
                         <div class="flex items-center gap-2">
                             <h2 class="font-semibold text-gray-900">{{ $product->name }}</h2>
                             @if ($product->is_stopped)
-                                <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                                <span class="rounded-full bg-gray-900/80 px-2 py-0.5 text-xs font-semibold text-white">
                                     販売終了
                                 </span>
                             @endif
@@ -76,7 +76,7 @@
 
             <a
                 href="{{ route('orders.create') }}"
-                class="rounded-lg bg-gray-900 px-6 py-3 font-semibold text-white transition hover:bg-gray-700"
+                class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700"
             >
                 注文手続きへ進む
             </a>

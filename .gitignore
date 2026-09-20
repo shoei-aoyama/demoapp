@@ -9,6 +9,7 @@
 .env
 .env.backup
 .env.production
+/config/test-accounts.ini
 .phpactor.json
 .phpunit.result.cache
 Homestead.json

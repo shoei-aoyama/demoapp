@@ -6,13 +6,13 @@
     <h1 class="mb-8 text-2xl font-bold text-gray-900">注文履歴</h1>
 
     @if ($orders->isEmpty())
-        <p class="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
+        <p class="rounded-lg bg-white p-8 text-center text-gray-500 shadow-sm">
             このセッションではまだ注文がありません。
         </p>
     @else
         <div class="space-y-6">
             @foreach ($orders as $order)
-                <div class="rounded-xl border border-gray-200 bg-white p-6">
+                <div class="rounded-xl bg-white p-6 shadow-sm">
                     <p class="mb-4 text-sm text-gray-500">
                         注文日時: {{ $order->created_at->format('Y/m/d H:i') }}
                     </p>

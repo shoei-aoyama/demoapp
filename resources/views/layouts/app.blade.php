@@ -7,15 +7,21 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
-    <header class="border-b border-gray-200 bg-white">
+    <header class="bg-white shadow-sm">
         <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-            <a href="{{ route('products.index') }}" class="text-lg font-semibold tracking-tight text-gray-900">
+            <a href="{{ route('products.index') }}" class="text-lg font-bold tracking-tight text-red-600">
                 商品注文デモ
             </a>
             <nav class="flex items-center gap-6 text-sm font-medium text-gray-600">
-                <a href="{{ route('products.index') }}" class="hover:text-gray-900">商品一覧</a>
-                <a href="{{ route('cart.show') }}" class="hover:text-gray-900">カート</a>
-                <a href="{{ route('orders.index') }}" class="hover:text-gray-900">注文履歴</a>
+                <a href="{{ route('products.index') }}" class="hover:text-red-600">商品一覧</a>
+                <a href="{{ route('cart.show') }}" class="hover:text-red-600">カート</a>
+                <a href="{{ route('orders.index') }}" class="hover:text-red-600">注文履歴</a>
+                @if (session('authenticated'))
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="hover:text-red-600">ログアウト</button>
+                    </form>
+                @endif
             </nav>
         </div>
     </header>

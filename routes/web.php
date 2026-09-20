@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -14,7 +15,14 @@ Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.u
 Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');
 Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
 
-Route::get('/checkout', [OrderController::class, 'create'])->name('orders.create');
-Route::post('/checkout', [OrderController::class, 'store'])->name('orders.store');
+Route::get('/login', [LoginController::class, 'show'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::middleware('test.auth')->group(function () {
+    Route::get('/checkout', [OrderController::class, 'create'])->name('orders.create');
+    Route::post('/checkout', [OrderController::class, 'store'])->name('orders.store');
+});
+
 Route::get('/orders/{order}/complete', [OrderController::class, 'complete'])->name('orders.complete');
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');

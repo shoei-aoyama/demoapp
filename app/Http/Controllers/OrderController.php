@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +18,7 @@ class OrderController extends Controller
         return view('orders.confirm', ['items' => $items]);
     }
 
-    public function store(StoreOrderRequest $request): RedirectResponse
+    public function store(): RedirectResponse
     {
         $items = $this->cartItems();
 
@@ -38,10 +37,10 @@ class OrderController extends Controller
 
         $totalPrice = $items->sum(fn (array $item) => $item['product']->price * $item['quantity']);
 
-        $order = DB::transaction(function () use ($request, $items, $totalPrice) {
+        $order = DB::transaction(function () use ($items, $totalPrice) {
             $order = Order::create([
-                'customer_name' => $request->validated('customer_name'),
-                'customer_email' => $request->validated('customer_email'),
+                'customer_name' => session('customer_name'),
+                'customer_email' => session('customer_email'),
                 'total_price' => $totalPrice,
             ]);
 

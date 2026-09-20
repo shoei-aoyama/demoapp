@@ -1,0 +1,8 @@
+; デモ用テストアカウント定義ファイルのひな形。
+; 実際に使うには、このファイルを config/test-accounts.ini としてコピーする。
+; config/test-accounts.ini は .gitignore 対象のためリポジトリには含まれない。
+
+[test_user]
+name = "テスト太郎"
+email = "test@example.com"
+password = "password"
